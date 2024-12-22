@@ -1,0 +1,1 @@
+export const SNACKBAR_CONFIG = "SNACKBAR_CONFIG";

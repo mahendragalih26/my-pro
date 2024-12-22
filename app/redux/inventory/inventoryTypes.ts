@@ -1,0 +1,1 @@
+export const SET_NEW_PRODUCT = "SET_NEW_PRODUCT"
