@@ -121,7 +121,7 @@ const Sidebar = () => {
         <SidebarLink
           href="/purchase"
           icon={CircleDollarSign}
-          label="purchase"
+          label="Purchase"
           isCollapsed={isSidebarCollapsed}
         />
       </div>

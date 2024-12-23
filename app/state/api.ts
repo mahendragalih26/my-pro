@@ -23,6 +23,14 @@ export interface Inventory {
   }[]
 }
 
+export interface Purchase {
+  Data: {
+    Id: string
+    Code: string
+    Total: number
+  }[]
+}
+
 export interface NewProduct {
   // name: string
   // price: number
@@ -70,7 +78,7 @@ export interface User {
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["Products", "Inventory", "Users", "Expenses"],
+  tagTypes: ["Products", "Inventory", "Purchase"],
   endpoints: (build) => ({
     getProducts: build.query<Product, string | void>({
       query: (search) => ({
@@ -93,13 +101,17 @@ export const api = createApi({
       }),
       invalidatesTags: ["Products"],
     }),
-    getUsers: build.query<User[], void>({
-      query: () => "/users",
-      providesTags: ["Users"],
+    getPurchase: build.query<Purchase, string | void>({
+      query: (search) => ({
+        url: "/purchase",
+      }),
+      providesTags: ["Purchase"],
     }),
-    getExpensesByCategory: build.query<ExpenseByCategorySummary[], void>({
-      query: () => "/expenses",
-      providesTags: ["Expenses"],
+    getPurchaseDetail: build.query<Purchase, string | void>({
+      query: (search) => ({
+        url: `/purchase/${search}`,
+      }),
+      providesTags: ["Purchase"],
     }),
   }),
 })
@@ -107,7 +119,7 @@ export const api = createApi({
 export const {
   useGetProductsQuery,
   useGetInventoryQuery,
+  useGetPurchaseQuery,
   useCreateProductMutation,
-  useGetUsersQuery,
-  useGetExpensesByCategoryQuery,
+  useGetPurchaseDetailQuery,
 } = api

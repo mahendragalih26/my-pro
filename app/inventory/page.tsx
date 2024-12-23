@@ -20,6 +20,7 @@ const columns: GridColDef[] = [
     headerName: "Stock Quantity",
     width: 150,
     type: "number",
+    editable: true,
   },
 ]
 
@@ -45,6 +46,14 @@ const Inventory = () => {
         rows={inventory?.Data}
         columns={columns}
         getRowId={(row) => row.ProductId}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 5,
+            },
+          },
+        }}
+        pageSizeOptions={[5]}
         checkboxSelection
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />
