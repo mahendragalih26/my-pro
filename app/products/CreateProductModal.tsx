@@ -2,6 +2,9 @@ import React, { ChangeEvent, FormEvent, useState } from "react"
 import { v4 } from "uuid"
 import Header from "@/app/(components)/Header"
 import { formatRupiah } from "@/app/helper"
+import Input from "../(components)/InputField/Input"
+import { Button } from "@mui/material"
+import UploadFile from "../(components)/InputField/uploadFile"
 
 type ProductFormData = {
   Id: string
@@ -36,12 +39,21 @@ const CreateProductModal = ({
     // rating: 0,
   })
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
-      // [name]: name === "Price" ? formatRupiah(value) : value,
+  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target
+  //   setFormData({
+  //     ...formData,
+  //     [name]: value,
+  //     // [name]: name === "Price" ? formatRupiah(value) : value,
+  //   })
+  // }
+
+  const handleChange = (name: string | number, value: any) => {
+    setFormData((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      }
     })
   }
 
@@ -62,61 +74,86 @@ const CreateProductModal = ({
       <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <Header name="Create New Product" />
         <form onSubmit={handleSubmit} className="mt-5">
-          {/* PRODUCT NAME */}
+          {/* Product Image */}
           <label htmlFor="productName" className={labelCssStyles}>
-            Product Name
+            Product Image
           </label>
-          <input
-            type="text"
-            name="Name"
-            placeholder="Name"
-            onChange={handleChange}
-            value={formData.Name}
-            className={inputCssStyles}
-            required
-          />
+          <div className="my-3">
+            <UploadFile
+              setValue={(val) => {
+                console.log("val = ", val)
+                handleChange("Image", val)
+              }}
+            />
+          </div>
+
+          {/* PRODUCT NAME */}
+          <div className="my-3">
+            <Input
+              label="Product Name"
+              variant="felxibel"
+              required={true}
+              type="text"
+              className="w-full"
+              placeholder="Product Name"
+              setValue={(val) => {
+                // console.log("value input = ", val)
+                handleChange("Name", val)
+              }}
+              helperText="Product Name cannot be empty"
+              // helperComponent={}
+              value={formData?.Name}
+              customValidation={!formData?.Name}
+            />
+          </div>
 
           {/* PRICE */}
-          <label htmlFor="productPrice" className={labelCssStyles}>
-            Price
-          </label>
-          <input
-            type="number"
-            name="Price"
-            placeholder="Price"
-            onChange={handleChange}
-            value={formData.Price}
-            className={inputCssStyles}
-            required
-          />
+          <div className="my-3">
+            <Input
+              label="Price"
+              variant="felxibel"
+              required={true}
+              type="currency"
+              className="w-full"
+              placeholder="Price"
+              setValue={(val) => {
+                // console.log("value input = ", val)
+                handleChange("Price", val)
+              }}
+              helperText="Price cannot be empty"
+              // helperComponent={}
+              value={formData?.Price}
+              // disabled={
+              //   tmpResolve?.sub_kategori_resolve === 2
+              //     ? false
+              //     : isPopupEdit || informasiFurther
+              // }
+              customValidation={!formData?.Price}
+            />
+          </div>
 
           {/* STOCK QUANTITY */}
-          <label htmlFor="stockQuantity" className={labelCssStyles}>
-            Stock Quantity
-          </label>
-          <input
-            type="number"
-            name="Stock"
-            placeholder="Stock Quantity"
-            onChange={handleChange}
-            value={formData.Stock}
-            className={inputCssStyles}
-            required
-          />
-
-          {/* RATING */}
-          <label htmlFor="rating" className={labelCssStyles}>
-            Image
-          </label>
-          <input
-            type="file"
-            name="Image"
-            placeholder="File Upload"
-            onChange={handleChange}
-            value={formData.Image}
-            className={inputCssStyles}
-            required
-          />
+          {/* <Input
+            label="Price"
+            variant="felxibel"
+            required={true}
+            type="currency"
+            className="w-full"
+            placeholder="Price"
+            setValue={(val) => {
+              // console.log("value input = ", val)
+              handleChange("Stock", val)
+            }}
+            helperText="Price cannot be empty"
+            // helperComponent={}
+            value={formData?.Stock}
+            // disabled={
+            //   tmpResolve?.sub_kategori_resolve === 2
+            //     ? false
+            //     : isPopupEdit || informasiFurther
+            // }
+            customValidation={!formData?.Stock}
+          /> */}
 
           {/* CREATE ACTIONS */}
           <button

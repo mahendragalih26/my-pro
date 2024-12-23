@@ -44,3 +44,34 @@ export function formatRupiah(amount: string, prefix?: string): string {
   // return prefix ? `${prefix} ${rupiah}` : rupiah;
   return prefix === undefined ? rupiah : rupiah ? `${prefix} ${rupiah}` : ""
 }
+
+export const filterCharacter = (e: any) => {
+  if (
+    e.code.includes("Digit") ||
+    e.code === "KeyE" ||
+    e.keyCode == 37 ||
+    e.keyCode == 39 ||
+    e.keyCode == 8
+  ) {
+    return true
+  } else {
+    e.preventDefault()
+    return false
+  }
+}
+
+export const numbersOnly = (e: any) => {
+  const charCode = e.which || e.keyCode
+
+  if (
+    (charCode > 47 && charCode < 58) ||
+    charCode == 37 ||
+    charCode == 39 ||
+    charCode == 8
+  ) {
+    return true
+  }
+
+  e.preventDefault()
+  return false
+}
