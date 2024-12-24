@@ -1,100 +1,132 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
 export interface Product {
-  productId: string;
-  name: string;
-  price: number;
-  rating?: number;
-  stockQuantity: number;
+  Data: {
+    Id: string
+    Code: string
+    Image: string
+    Name: string
+    Price: number
+  }[]
+  // productId: string
+  // name: string
+  // price: number
+  // rating?: number
+  // stockQuantity: number
+}
+
+export interface Inventory {
+  Data: {
+    ProductId: string
+    ProductName: string
+    Stock: number
+  }[]
+}
+
+export interface Purchase {
+  Data: {
+    Id: string
+    Code: string
+    Items?: PurchaseList[]
+    Total: number
+  }[]
+}
+
+export interface PurchaseList {
+  Data: {
+    Id: string
+    Code: string
+    Items?: {
+      Id: string
+      Product: {
+        Id: string
+        Code: string
+        Image: string
+        Name: string
+        Price: number
+      }
+      Quantity: number
+      Discount: number
+      Subtotal: number
+    }[]
+    Total: number
+  }
 }
 
 export interface NewProduct {
-  name: string;
-  price: number;
-  rating?: number;
-  stockQuantity: number;
-}
-
-export interface SalesSummary {
-  salesSummaryId: string;
-  totalValue: number;
-  changePercentage?: number;
-  date: string;
-}
-
-export interface PurchaseSummary {
-  purchaseSummaryId: string;
-  totalPurchased: number;
-  changePercentage?: number;
-  date: string;
-}
-
-export interface ExpenseSummary {
-  expenseSummarId: string;
-  totalExpenses: number;
-  date: string;
-}
-
-export interface ExpenseByCategorySummary {
-  expenseByCategorySummaryId: string;
-  category: string;
-  amount: string;
-  date: string;
-}
-
-export interface DashboardMetrics {
-  popularProducts: Product[];
-  salesSummary: SalesSummary[];
-  purchaseSummary: PurchaseSummary[];
-  expenseSummary: ExpenseSummary[];
-  expenseByCategorySummary: ExpenseByCategorySummary[];
-}
-
-export interface User {
-  userId: string;
-  name: string;
-  email: string;
+  // name: string
+  // price: number
+  // rating?: number
+  // stockQuantity: number
+  Code: string
+  Image: string
+  Name: string
+  Price: number
 }
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["DashboardMetrics", "Products", "Users", "Expenses"],
+  tagTypes: ["Products", "Inventory", "Purchase"],
   endpoints: (build) => ({
-    getDashboardMetrics: build.query<DashboardMetrics, void>({
-      query: () => "/dashboard",
-      providesTags: ["DashboardMetrics"],
-    }),
-    getProducts: build.query<Product[], string | void>({
+    getProducts: build.query<Product, string | void>({
       query: (search) => ({
-        url: "/products",
+        url: "/product",
         params: search ? { search } : {},
       }),
       providesTags: ["Products"],
     }),
     createProduct: build.mutation<Product, NewProduct>({
       query: (newProduct) => ({
-        url: "/products",
+        url: "/product",
         method: "POST",
         body: newProduct,
       }),
       invalidatesTags: ["Products"],
     }),
-    getUsers: build.query<User[], void>({
-      query: () => "/users",
-      providesTags: ["Users"],
+    updateProduct: build.mutation({
+      query: ({ id, updatedData }) => ({
+        url: `/product/${id}`,
+        method: "PUT",
+        body: updatedData,
+      }),
+      invalidatesTags: ["Products"],
     }),
-    getExpensesByCategory: build.query<ExpenseByCategorySummary[], void>({
-      query: () => "/expenses",
-      providesTags: ["Expenses"],
+    deleteProduct: build.mutation({
+      query: (id) => ({
+        url: `/product/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    getInventory: build.query<Inventory, string | void>({
+      query: (search) => ({
+        url: "/inventory",
+      }),
+      providesTags: ["Inventory"],
+    }),
+
+    getPurchase: build.query<Purchase, string | void>({
+      query: (search) => ({
+        url: "/purchase",
+      }),
+      providesTags: ["Purchase"],
+    }),
+    getPurchaseDetail: build.query<PurchaseList, string | void>({
+      query: (search) => ({
+        url: `/purchase/${search}`,
+      }),
+      providesTags: ["Purchase"],
     }),
   }),
-});
+})
 
 export const {
-  useGetDashboardMetricsQuery,
   useGetProductsQuery,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  useGetInventoryQuery,
+  useGetPurchaseQuery,
+  useGetPurchaseDetailQuery,
   useCreateProductMutation,
-  useGetUsersQuery,
-  useGetExpensesByCategoryQuery,
-} = api;
+} = api
