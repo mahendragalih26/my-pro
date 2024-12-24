@@ -2,11 +2,12 @@
 
 import {
   useCreateProductMutation,
+  useDeleteProductMutation,
   useGetInventoryQuery,
   useGetProductsQuery,
   useUpdateProductMutation,
 } from "@/app/state/api"
-import { PlusCircleIcon, SearchIcon } from "lucide-react"
+import { Pen, PlusCircleIcon, SearchIcon, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { connect } from "react-redux"
 import Header from "@/app/(components)/Header"
@@ -16,7 +17,7 @@ import { currencyConvert } from "@/app/helper"
 
 import { SnackbarProps } from "@/app/helper/initState/snackbar"
 import { snackbarConfig } from "../redux/snackbar/snackbarActions"
-import { Pagination } from "@mui/material"
+import { Avatar, Pagination, Tooltip } from "@mui/material"
 import {
   initProduct,
   Product,
@@ -70,13 +71,13 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
     }
   }, [products])
 
-  useEffect(() => {
-    console.log("aa = ", tmpProduct)
+  // useEffect(() => {
+  //   console.log("aa = ", tmpProduct)
 
-    return () => {
-      // second
-    }
-  }, [tmpProduct])
+  //   return () => {
+  //     // second
+  //   }
+  // }, [tmpProduct])
 
   const [createProduct] = useCreateProductMutation()
   const handleCreateProduct = async (productData: ProductFormData) => {
@@ -121,6 +122,51 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
       }
     })
   }
+
+  const [deleteProduct] = useDeleteProductMutation()
+
+  const handleDelete = async (productId: string) => {
+    await deleteProduct(productId).then((res: any) => {
+      if (res?.error) {
+        snackbarConfig({
+          isSnackbarShown: true,
+          title: "message",
+          description: `${res?.error?.data?.Message}`,
+          severity: "error",
+        })
+      } else {
+        snackbarConfig({
+          isSnackbarShown: true,
+          title: "message",
+          description: `${res?.data?.Message}`,
+          severity: "success",
+        })
+      }
+    })
+  }
+
+  // Search function
+  const searchByName = (name: string) => {
+    return products?.Data.filter(
+      (item) => item.Name.toLowerCase() === name.toLowerCase()
+    )
+  }
+
+  useEffect(() => {
+    // first
+    if (searchTerm) {
+      setTimeout(() => {
+        let result = searchByName(searchTerm)
+        if (result?.length) {
+          settmpProduct(result)
+        }
+      }, 1000)
+    }
+
+    return () => {
+      // second
+    }
+  }, [searchTerm])
 
   if (isLoading) {
     return <div className="py-4">Loading...</div>
@@ -171,16 +217,18 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          tmpProduct?.map((product: any) => (
+          tmpProduct?.map((product: any, index: number) => (
             <div
               key={product?.Id}
               className="border shadow rounded-md p-4 max-w-full w-full mx-auto cursor-pointer"
-              onClick={() => {
-                setIsModalUpdateOpen(true)
-                setupdateProps(product)
-              }}
             >
-              <div className="flex flex-col items-center">
+              <div
+                className="flex flex-col items-center"
+                onClick={() => {
+                  setIsModalUpdateOpen(true)
+                  setupdateProps(product)
+                }}
+              >
                 <Image
                   src={product?.Image}
                   alt={product?.Name}
@@ -206,6 +254,32 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
                     )?.Stock ?? "-"}
                   </div>
                 )}
+              </div>
+              <div className="flex flex-row-reverse">
+                <div
+                  onClick={() => {
+                    handleDelete(product?.Id)
+                  }}
+                >
+                  <Tooltip title="Delete Product">
+                    <Avatar>
+                      <Trash2 />
+                    </Avatar>
+                  </Tooltip>
+                </div>
+                <div
+                  className="mr-3"
+                  onClick={() => {
+                    setIsModalUpdateOpen(true)
+                    setupdateProps(product)
+                  }}
+                >
+                  <Tooltip title="Edit Product">
+                    <Avatar>
+                      <Pen />
+                    </Avatar>
+                  </Tooltip>
+                </div>
               </div>
             </div>
           ))
