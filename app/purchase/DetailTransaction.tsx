@@ -1,11 +1,8 @@
-"use client"
-
 import {
   useCreateProductMutation,
-  useGetInventoryQuery,
-  useGetProductsQuery,
+  useGetPurchaseDetailQuery,
 } from "@/app/state/api"
-import { PlusCircleIcon, SearchIcon } from "lucide-react"
+import { PlusCircleIcon, SearchIcon, ShoppingCart } from "lucide-react"
 import { useState } from "react"
 import Header from "@/app/(components)/Header"
 import Image from "next/image"
@@ -18,10 +15,14 @@ import {
   ListItemAvatar,
   Avatar,
   Typography,
+  CardContent,
+  Button,
+  CardActions,
+  Chip,
 } from "@mui/material"
 
 interface Props {
-  listProduct: []
+  purchaseId: string
 }
 
 type ProductFormData = {
@@ -36,35 +37,35 @@ type ProductFormData = {
   Price: number
 }
 
-const DetailTransaction = () => {
+const DetailTransaction = ({ purchaseId }: Props) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [tmpProduct, settmpProduct] = useState([])
-
-  const { data: products, isLoading, isError } = useGetProductsQuery(searchTerm)
   const {
-    data: stock,
-    isLoading: stockLoader,
-    isError: stockError,
-  } = useGetInventoryQuery()
+    data: purchaseList,
+    isLoading,
+    isError,
+  } = useGetPurchaseDetailQuery(purchaseId)
 
-  const [createProduct] = useCreateProductMutation()
-  const handleCreateProduct = async (productData: ProductFormData) => {
-    await createProduct(productData)
-  }
+  //   const [createProduct] = useCreateProductMutation()
+  //   const handleCreateProduct = async (productData: ProductFormData) => {
+  //     await createProduct(productData)
+  //   }
 
   if (isLoading) {
     return <div className="py-4">Loading...</div>
   }
 
-  if (isError || !products || stockError || !stock) {
+  if (isError || !purchaseList?.Data) {
     return (
       <div className="text-center text-red-500 py-4">
         Failed to fetch products
       </div>
     )
   }
+
+  console.log("purchaseList = ", purchaseList)
 
   return (
     <div className="mx-auto pb-5 w-full">
@@ -87,57 +88,60 @@ const DetailTransaction = () => {
       </div>
 
       {/* BODY PRODUCTS LIST */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg-grid-cols-3 gap-10 justify-between">
+      <div className="justify-between">
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          products?.Data?.map((product) => (
-            <div
-              key={product?.Id}
-              className="border shadow rounded-md p-4 max-w-full w-full mx-auto"
-            >
-              <List
-                sx={{
-                  width: "100%",
-                  maxWidth: 360,
-                  bgcolor: "background.paper",
-                }}
-              >
-                <ListItem alignItems="flex-start">
-                  <ListItemAvatar>
-                    <Avatar alt="Remy Sharp" src={product?.Image} />
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={product?.Name}
-                    secondary={
-                      <>
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          sx={{ color: "text.primary", display: "inline" }}
-                        >
-                          Rp. {currencyConvert(product?.Price)}
-                        </Typography>
-                        {stockLoader && stock ? (
-                          <div className="text-sm text-gray-600 mt-1">
-                            Stock : wait a sec..
-                          </div>
-                        ) : (
-                          <div className="text-sm text-gray-600 mt-1">
-                            Stock:{" "}
-                            {stock?.Data?.find(
-                              (item: any) => item?.ProductId === product?.Id
-                            )?.Stock ?? "-"}
-                          </div>
-                        )}
-                      </>
-                    }
-                  />
-                </ListItem>
-                <Divider variant="inset" component="li" />
-              </List>
+          <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg-grid-cols-3 gap-10 justify-between text-end">
+              {purchaseList?.Data?.Items?.map((product: any) => (
+                <div className="flex flex-row " key={product?.Id}>
+                  <CardContent>
+                    <Image
+                      src={product?.Product?.Image}
+                      alt={product?.Product?.Name}
+                      width={150}
+                      height={150}
+                      className="mb-3 rounded-2xl w-36 h-36"
+                    />
+                  </CardContent>
+                  <CardContent>
+                    <Typography variant="h5" component="div" sx={{ mb: 0.5 }}>
+                      {product?.Product?.Name}
+                    </Typography>
+                    <Typography sx={{ color: "text.secondary" }}>
+                      Price :{" "}
+                      <span>
+                        Rp. {currencyConvert(product?.Product?.Price)}
+                      </span>
+                    </Typography>
+                    <Typography sx={{ color: "text.secondary" }}>
+                      Purchase : <span> {product?.Quantity} pcs</span>
+                    </Typography>
+                    <Typography
+                      gutterBottom
+                      sx={{ color: "text.secondary", fontSize: 14, mb: 1 }}
+                    >
+                      Discount {product?.Discount}%
+                    </Typography>
+                    <Divider />
+                    <Typography variant="h6" component="div" sx={{ mt: 1 }}>
+                      SubTotal :{" "}
+                      <span>Rp. {currencyConvert(product?.Subtotal)}</span>
+                    </Typography>
+                  </CardContent>
+                </div>
+              ))}
             </div>
-          ))
+            <Divider />
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ mt: 1, textAlign: "end" }}
+            >
+              Total : Rp. {currencyConvert(purchaseList?.Data?.Total)}
+            </Typography>
+          </div>
         )}
       </div>
 

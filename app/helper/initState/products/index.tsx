@@ -1,3 +1,11 @@
+export interface SingleProduct {
+  Id: string
+  Code: string
+  Image: string
+  Name: string
+  Price: number
+}
+
 export interface Product {
   Data: {
     Id: string

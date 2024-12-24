@@ -5,6 +5,7 @@ import { formatRupiah } from "@/app/helper"
 import Input from "../(components)/InputField/Input"
 import { Button } from "@mui/material"
 import UploadFile from "../(components)/InputField/uploadFile"
+import { SnackbarProps } from "../helper/initState/snackbar"
 
 type ProductFormData = {
   Id: string
@@ -19,12 +20,14 @@ type CreateProductModalProps = {
   isOpen: boolean
   onClose: () => void
   onCreate: (formData: ProductFormData) => void
+  snackbarConfig: (data: SnackbarProps) => void
 }
 
 const CreateProductModal = ({
   isOpen,
   onClose,
   onCreate,
+  snackbarConfig,
 }: CreateProductModalProps) => {
   const [formData, setFormData] = useState({
     Id: v4(),
@@ -32,12 +35,14 @@ const CreateProductModal = ({
     Image: "",
     Name: "",
     Price: 0,
-    Stock: 0,
+    // Stock: 0,
     // name: "",
     // price: 0,
     // stockQuantity: 0,
     // rating: 0,
   })
+
+  const [warningFE, setwarningFE] = useState<boolean>(false)
 
   // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
   //   const { name, value } = e.target
@@ -47,6 +52,32 @@ const CreateProductModal = ({
   //     // [name]: name === "Price" ? formatRupiah(value) : value,
   //   })
   // }
+
+  const handleFileChange = (newfile: any) => {
+    const files = newfile
+    if (files) {
+      const fileArray = Array.from(files) // Convert FileList to Array
+      const imageUrls: string[] = []
+
+      fileArray.forEach((file: any) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            imageUrls.push(e.target.result.toString())
+            // Update state after reading all files
+            if (imageUrls.length === fileArray.length) {
+              // setImages(imageUrls);
+              console.log("imageurl = ", imageUrls)
+              setFormData((prev: any) => {
+                return { ...prev, Image: imageUrls[0] }
+              })
+            }
+          }
+        }
+        reader.readAsDataURL(file) // Read the file as a Data URL
+      })
+    }
+  }
 
   const handleChange = (name: string | number, value: any) => {
     setFormData((prev) => {
@@ -59,8 +90,26 @@ const CreateProductModal = ({
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onCreate(formData)
-    onClose()
+    validationField(formData)
+  }
+
+  const validationField = (formData: ProductFormData) => {
+    if (!formData?.Code || !formData?.Name) {
+      setwarningFE(true)
+      snackbarConfig({
+        isSnackbarShown: true,
+        title: "message",
+        description: `Field is required`,
+        severity: "error",
+        // actionYes: () => {
+        //   history.push(`/`);
+        // },
+        // defaultActionNo: true,
+      })
+    } else {
+      onCreate(formData)
+      onClose()
+    }
   }
 
   if (!isOpen) return null
@@ -83,7 +132,28 @@ const CreateProductModal = ({
               setValue={(val) => {
                 console.log("val = ", val)
                 handleChange("Image", val)
+                handleFileChange(val)
               }}
+            />
+          </div>
+
+          {/* PRODUCT Code */}
+          <div className="my-3">
+            <Input
+              label="Product Code"
+              variant="felxibel"
+              required={true}
+              type="text"
+              className="w-full"
+              placeholder="Product Code"
+              setValue={(val) => {
+                // console.log("value input = ", val)
+                handleChange("Code", val)
+              }}
+              helperText="Product Code cannot be empty"
+              // helperComponent={}
+              value={formData?.Code}
+              customValidation={warningFE && !formData?.Code}
             />
           </div>
 
@@ -103,7 +173,7 @@ const CreateProductModal = ({
               helperText="Product Name cannot be empty"
               // helperComponent={}
               value={formData?.Name}
-              customValidation={!formData?.Name}
+              customValidation={warningFE && !formData?.Name}
             />
           </div>
 
@@ -120,7 +190,7 @@ const CreateProductModal = ({
                 // console.log("value input = ", val)
                 handleChange("Price", val)
               }}
-              helperText="Price cannot be empty"
+              helperText="Price cannot be empty or negative"
               // helperComponent={}
               value={formData?.Price}
               // disabled={
@@ -128,7 +198,7 @@ const CreateProductModal = ({
               //     ? false
               //     : isPopupEdit || informasiFurther
               // }
-              customValidation={!formData?.Price}
+              customValidation={warningFE && Number(formData?.Price) < 1}
             />
           </div>
 

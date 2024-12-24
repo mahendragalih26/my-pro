@@ -1,23 +1,21 @@
-export interface SnackbarProps {
-  isSnackbarShown: boolean
+export interface Dialog {
+  isDialogShown: boolean
   title?: string
   description?: string
   cancelLabel?: string
   saveLabel?: string
-  severity?: "info" | "error" | "success" | "warning"
   // actionYes?: () => void;
   // actionNo?: () => void | undefined;
   defaultActionNo?: boolean
   withoutClose?: boolean
 }
 
-export const initSnackbar: SnackbarProps = {
-  isSnackbarShown: false,
+export const initDialog: Dialog = {
+  isDialogShown: false,
   title: "",
   description: "",
   cancelLabel: "Batal",
   saveLabel: "Ok",
-  severity: "error",
   // actionYes: () => ({}),
   // actionNo: () => void {},
   defaultActionNo: false,

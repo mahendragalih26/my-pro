@@ -88,7 +88,7 @@ export default function CustomizedAccordions() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-5">
         <Header name="Purchase List" />
         <button
           className="flex items-center bg-blue-500 hover:bg-blue-700 text-gray-200 font-bold py-2 px-4 rounded"
@@ -120,7 +120,7 @@ export default function CustomizedAccordions() {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <DetailTransaction />
+                  <DetailTransaction purchaseId={list?.Id} />
                 </AccordionDetails>
               </Accordion>
             </div>

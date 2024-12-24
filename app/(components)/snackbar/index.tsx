@@ -35,9 +35,6 @@ const SnackbarComponent: React.FC<Props> = ({ snackbar, snackbarConfig }) => {
     }, 200)
   }
   const closeSnackbar = () => {
-    if (snackbar.actionNo) {
-      snackbar.actionNo()
-    }
     resetSnackbar()
   }
 
@@ -77,7 +74,7 @@ const SnackbarComponent: React.FC<Props> = ({ snackbar, snackbarConfig }) => {
         <Alert
           onClose={closeSnackbar}
           //   severity="success"
-          severity="error"
+          severity={snackbar?.severity}
           variant="filled"
           sx={{ width: "100%" }}
         >

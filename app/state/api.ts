@@ -27,8 +27,30 @@ export interface Purchase {
   Data: {
     Id: string
     Code: string
+    Items?: PurchaseList[]
     Total: number
   }[]
+}
+
+export interface PurchaseList {
+  Data: {
+    Id: string
+    Code: string
+    Items?: {
+      Id: string
+      Product: {
+        Id: string
+        Code: string
+        Image: string
+        Name: string
+        Price: number
+      }
+      Quantity: number
+      Discount: number
+      Subtotal: number
+    }[]
+    Total: number
+  }
 }
 
 export interface NewProduct {
@@ -40,39 +62,6 @@ export interface NewProduct {
   Image: string
   Name: string
   Price: number
-}
-
-export interface SalesSummary {
-  salesSummaryId: string
-  totalValue: number
-  changePercentage?: number
-  date: string
-}
-
-export interface PurchaseSummary {
-  purchaseSummaryId: string
-  totalPurchased: number
-  changePercentage?: number
-  date: string
-}
-
-export interface ExpenseSummary {
-  expenseSummarId: string
-  totalExpenses: number
-  date: string
-}
-
-export interface ExpenseByCategorySummary {
-  expenseByCategorySummaryId: string
-  category: string
-  amount: string
-  date: string
-}
-
-export interface User {
-  userId: string
-  name: string
-  email: string
 }
 
 export const api = createApi({
@@ -107,7 +96,7 @@ export const api = createApi({
       }),
       providesTags: ["Purchase"],
     }),
-    getPurchaseDetail: build.query<Purchase, string | void>({
+    getPurchaseDetail: build.query<PurchaseList, string | void>({
       query: (search) => ({
         url: `/purchase/${search}`,
       }),
@@ -120,6 +109,6 @@ export const {
   useGetProductsQuery,
   useGetInventoryQuery,
   useGetPurchaseQuery,
-  useCreateProductMutation,
   useGetPurchaseDetailQuery,
+  useCreateProductMutation,
 } = api

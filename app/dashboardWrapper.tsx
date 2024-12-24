@@ -1,9 +1,11 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React, { Suspense, useEffect } from "react"
 import Navbar from "@/app/(components)/Navbar"
 import Sidebar from "@/app/(components)/Sidebar"
 import StoreProvider, { useAppSelector } from "./reduxConfig"
+import AlertDialog from "./(components)/dialogs/AlertDialog"
+import Snackbar from "./(components)/snackbar"
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const isSidebarCollapsed = useAppSelector(
@@ -42,6 +44,10 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <StoreProvider>
       <DashboardLayout>{children}</DashboardLayout>
+      <Suspense fallback={"loading"}>
+        <AlertDialog />
+        <Snackbar />
+      </Suspense>
     </StoreProvider>
   )
 }

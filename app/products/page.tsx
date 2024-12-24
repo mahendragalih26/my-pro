@@ -7,17 +7,26 @@ import {
 } from "@/app/state/api"
 import { PlusCircleIcon, SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { connect } from "react-redux"
 import Header from "@/app/(components)/Header"
-import Rating from "@/app/(components)/Rating"
 import CreateProductModal from "./CreateProductModal"
 import Image from "next/image"
 import { currencyConvert } from "@/app/helper"
 
+import { SnackbarProps } from "@/app/helper/initState/snackbar"
+import { snackbarConfig } from "../redux/snackbar/snackbarActions"
+import { Pagination } from "@mui/material"
+import {
+  initProduct,
+  Product,
+  SingleProduct,
+} from "../helper/initState/products"
+
+interface Props {
+  snackbarConfig: (data: SnackbarProps) => void
+}
+
 type ProductFormData = {
-  // name: string
-  // price: number
-  // stockQuantity: number
-  // rating: number
   Id: string
   Code: string
   Image: string
@@ -25,11 +34,22 @@ type ProductFormData = {
   Price: number
 }
 
-const Products = () => {
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    snackbarConfig: (data: SnackbarProps) => dispatch(snackbarConfig(data)),
+  }
+}
+
+const mapStateToProps = (state: any) => {
+  return {
+    products: state.products,
+  }
+}
+
+const Products: React.FC<Props> = ({ snackbarConfig }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const [tmpProduct, settmpProduct] = useState([])
+  const [tmpProduct, settmpProduct] = useState<SingleProduct[]>([])
 
   const { data: products, isLoading, isError } = useGetProductsQuery(searchTerm)
   const {
@@ -38,9 +58,37 @@ const Products = () => {
     isError: stockError,
   } = useGetInventoryQuery()
 
+  useEffect(() => {
+    if (products?.Data) {
+      settmpProduct(products?.Data) // Store products in state
+    }
+  }, [products])
+
+  useEffect(() => {
+    console.log("aa = ", tmpProduct)
+
+    return () => {
+      // second
+    }
+  }, [tmpProduct])
+
   const [createProduct] = useCreateProductMutation()
   const handleCreateProduct = async (productData: ProductFormData) => {
-    await createProduct(productData)
+    await createProduct(productData).then((res: any) => {
+      settmpProduct((prev) => {
+        return [...prev, productData]
+      })
+      snackbarConfig({
+        isSnackbarShown: true,
+        title: "message",
+        description: `${res?.data?.Message}`,
+        severity: "success",
+        // actionYes: () => {
+        //   history.push(`/`);
+        // },
+        // defaultActionNo: true,
+      })
+    })
   }
 
   if (isLoading) {
@@ -82,12 +130,17 @@ const Products = () => {
         </button>
       </div>
 
+      {/* PAGINATION */}
+      <div className="flex-end my-5">
+        <Pagination count={1} variant="outlined" shape="rounded" />
+      </div>
+
       {/* BODY PRODUCTS LIST */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg-grid-cols-3 gap-10 justify-between">
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          products?.Data?.map((product) => (
+          tmpProduct?.map((product: any) => (
             <div
               key={product?.Id}
               className="border shadow rounded-md p-4 max-w-full w-full mx-auto"
@@ -129,9 +182,10 @@ const Products = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateProduct}
+        snackbarConfig={snackbarConfig}
       />
     </div>
   )
 }
 
-export default Products
+export default connect(mapStateToProps, mapDispatchToProps)(Products)
