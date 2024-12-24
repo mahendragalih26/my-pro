@@ -4,6 +4,7 @@ import {
   useCreateProductMutation,
   useGetInventoryQuery,
   useGetProductsQuery,
+  useUpdateProductMutation,
 } from "@/app/state/api"
 import { PlusCircleIcon, SearchIcon } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -21,6 +22,7 @@ import {
   Product,
   SingleProduct,
 } from "../helper/initState/products"
+import UpdateProductModal from "./UpdateProductModal"
 
 interface Props {
   snackbarConfig: (data: SnackbarProps) => void
@@ -50,6 +52,10 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [tmpProduct, settmpProduct] = useState<SingleProduct[]>([])
+
+  // Update product
+  const [updateProps, setupdateProps] = useState<SingleProduct>()
+  const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false)
 
   const { data: products, isLoading, isError } = useGetProductsQuery(searchTerm)
   const {
@@ -83,11 +89,36 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
         title: "message",
         description: `${res?.data?.Message}`,
         severity: "success",
-        // actionYes: () => {
-        //   history.push(`/`);
-        // },
-        // defaultActionNo: true,
       })
+    })
+  }
+
+  const [updateProduct] = useUpdateProductMutation()
+  const handleUpdateProduct = async (productData: ProductFormData) => {
+    await updateProduct({
+      id: productData?.Id,
+      updateProduct: {
+        Code: productData?.Code,
+        Name: productData?.Name,
+        Image: productData?.Image,
+        Price: productData?.Price,
+      },
+    }).then((res: any) => {
+      if (res?.error) {
+        snackbarConfig({
+          isSnackbarShown: true,
+          title: "message",
+          description: `${res?.error?.data?.Message}`,
+          severity: "error",
+        })
+      } else {
+        snackbarConfig({
+          isSnackbarShown: true,
+          title: "message",
+          description: `${res?.data?.Message}`,
+          severity: "success",
+        })
+      }
     })
   }
 
@@ -143,7 +174,11 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
           tmpProduct?.map((product: any) => (
             <div
               key={product?.Id}
-              className="border shadow rounded-md p-4 max-w-full w-full mx-auto"
+              className="border shadow rounded-md p-4 max-w-full w-full mx-auto cursor-pointer"
+              onClick={() => {
+                setIsModalUpdateOpen(true)
+                setupdateProps(product)
+              }}
             >
               <div className="flex flex-col items-center">
                 <Image
@@ -182,6 +217,14 @@ const Products: React.FC<Props> = ({ snackbarConfig }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateProduct}
+        snackbarConfig={snackbarConfig}
+      />
+
+      <UpdateProductModal
+        isOpen={isModalUpdateOpen}
+        productList={updateProps}
+        onClose={() => setIsModalUpdateOpen(false)}
+        onUpdate={handleUpdateProduct}
         snackbarConfig={snackbarConfig}
       />
     </div>

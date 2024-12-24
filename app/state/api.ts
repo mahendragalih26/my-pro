@@ -76,12 +76,6 @@ export const api = createApi({
       }),
       providesTags: ["Products"],
     }),
-    getInventory: build.query<Inventory, string | void>({
-      query: (search) => ({
-        url: "/inventory",
-      }),
-      providesTags: ["Inventory"],
-    }),
     createProduct: build.mutation<Product, NewProduct>({
       query: (newProduct) => ({
         url: "/product",
@@ -90,6 +84,28 @@ export const api = createApi({
       }),
       invalidatesTags: ["Products"],
     }),
+    updateProduct: build.mutation({
+      query: ({ id, updatedData }) => ({
+        url: `/product/${id}`,
+        method: "PUT",
+        body: updatedData,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    deleteProduct: build.mutation({
+      query: (id) => ({
+        url: `/product/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    getInventory: build.query<Inventory, string | void>({
+      query: (search) => ({
+        url: "/inventory",
+      }),
+      providesTags: ["Inventory"],
+    }),
+
     getPurchase: build.query<Purchase, string | void>({
       query: (search) => ({
         url: "/purchase",
@@ -107,6 +123,8 @@ export const api = createApi({
 
 export const {
   useGetProductsQuery,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
   useGetInventoryQuery,
   useGetPurchaseQuery,
   useGetPurchaseDetailQuery,
