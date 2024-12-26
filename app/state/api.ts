@@ -54,14 +54,15 @@ export interface PurchaseList {
 }
 
 export interface NewProduct {
-  // name: string
-  // price: number
-  // rating?: number
-  // stockQuantity: number
   Code: string
   Image: string
   Name: string
   Price: number
+}
+
+export interface NewStock {
+  ProductId: string
+  AddStock: number
 }
 
 export const api = createApi({
@@ -105,7 +106,14 @@ export const api = createApi({
       }),
       providesTags: ["Inventory"],
     }),
-
+    addStock: build.mutation<Inventory, NewStock>({
+      query: (addNewStock) => ({
+        url: "/inventory",
+        method: "POST",
+        body: addNewStock,
+      }),
+      invalidatesTags: ["Inventory"],
+    }),
     getPurchase: build.query<Purchase, string | void>({
       query: (search) => ({
         url: "/purchase",
@@ -126,6 +134,7 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetInventoryQuery,
+  useAddStockMutation,
   useGetPurchaseQuery,
   useGetPurchaseDetailQuery,
   useCreateProductMutation,

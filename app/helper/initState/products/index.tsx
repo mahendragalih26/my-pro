@@ -30,7 +30,16 @@ export const initProduct: Product = {
 }
 
 export interface Inventory {
+  isNew?: any
   ProductId: string
   ProductName: string
   Stock: number
 }
+
+export const initInventory: Inventory[] = [
+  {
+    ProductId: "0",
+    ProductName: "",
+    Stock: 0,
+  },
+]
